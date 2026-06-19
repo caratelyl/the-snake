@@ -42,6 +42,8 @@ clock = pygame.time.Clock()
 
 # Тут опишите все классы игры.
 class GameObject:
+    """Класс, с помощью которого создаем все обьекты."""
+
     def __init__(self, body_color):
         self.position = (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
         self.body_color = body_color
@@ -51,16 +53,21 @@ class GameObject:
 
 
 class Apple(GameObject):
+    """Класс, с помощью которого создаем яблоко."""
+
     def __init__(self, body_color=APPLE_COLOR):
         super().__init__(body_color)
         self.randomize_position()
 
     def randomize_position(self):
+        """Функция, которая получает случайные координаты для яблока."""
+
+        # Число ячеек на поле.
         max_grid_height = SCREEN_HEIGHT // GRID_SIZE
         max_grid_width = SCREEN_WIDTH // GRID_SIZE
 
-        random_x = randint(0, max_grid_height - 1) * GRID_SIZE
-        random_y = randint(0, max_grid_width - 1) * GRID_SIZE
+        random_y = randint(0, max_grid_height - 1) * GRID_SIZE
+        random_x = randint(0, max_grid_width - 1) * GRID_SIZE
         self.position = (random_x, random_y)
 
     # Метод draw класса Apple
@@ -71,6 +78,8 @@ class Apple(GameObject):
 
 
 class Snake(GameObject):
+    """Класс, с помощью которошо создаем змейку."""
+
     def __init__(self, body_color=SNAKE_COLOR):
         super().__init__(body_color)
         self.length = 1
@@ -80,6 +89,7 @@ class Snake(GameObject):
         self.last = None
 
     def get_head_position(self):
+        """Начальная позиция змейки."""
         return self.positions[0]
 
     # Метод обновления направления после нажатия на кнопку
@@ -106,11 +116,14 @@ class Snake(GameObject):
             pygame.draw.rect(screen, BOARD_BACKGROUND_COLOR, last_rect)
 
     def move(self):
+        """Функция, с помощью которой двигается змейка.
+        (создается голова и удаляется хвост)."""
+
         head_x, head_y = self.get_head_position()
         dx, dy = self.direction
 
-        new_x = head_x + dx * GRID_SIZE
-        new_y = head_y + dy * GRID_SIZE
+        new_x = (head_x + dx * GRID_SIZE) % SCREEN_WIDTH
+        new_y = (head_y + dy * GRID_SIZE) % SCREEN_HEIGHT
         new_head = (new_x, new_y)
 
         self.positions.insert(0, new_head)
@@ -121,6 +134,7 @@ class Snake(GameObject):
             self.last = None
 
     def reset(self):
+        """Функция, начинающая игру сначала при проигрыше"""
         self.length = 1
         self.positions = [self.position]
         self.direction = choice([UP, DOWN, LEFT, RIGHT])
@@ -164,7 +178,7 @@ def main():
             snake.length += 1
             apple.randomize_position()
 
-        if snake.get_head_position() == snake.positions[1:]:
+        if snake.get_head_position() in snake.positions[1:]:
             snake.reset()
             screen.fill(BOARD_BACKGROUND_COLOR)
 
