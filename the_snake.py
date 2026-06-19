@@ -44,11 +44,12 @@ clock = pygame.time.Clock()
 class GameObject:
     """Класс, с помощью которого создаем все обьекты."""
 
-    def __init__(self, body_color):
+    def __init__(self, body_color=None):
         self.position = (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
         self.body_color = body_color
 
     def draw(self):
+        """Функция, отрисовки обьектов"""
         pass
 
 
@@ -61,7 +62,6 @@ class Apple(GameObject):
 
     def randomize_position(self):
         """Функция, которая получает случайные координаты для яблока."""
-
         # Число ячеек на поле.
         max_grid_height = SCREEN_HEIGHT // GRID_SIZE
         max_grid_width = SCREEN_WIDTH // GRID_SIZE
@@ -72,6 +72,7 @@ class Apple(GameObject):
 
     # Метод draw класса Apple
     def draw(self):
+        """Функция, отрисовки обьектов"""
         rect = pygame.Rect(self.position, (GRID_SIZE, GRID_SIZE))
         pygame.draw.rect(screen, self.body_color, rect)
         pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
@@ -92,14 +93,15 @@ class Snake(GameObject):
         """Начальная позиция змейки."""
         return self.positions[0]
 
-    # Метод обновления направления после нажатия на кнопку
     def update_direction(self):
+        """Метод обновления направления после нажатия на кнопку"""
         if self.next_direction:
             self.direction = self.next_direction
             self.next_direction = None
 
     # # Метод draw класса Snake
     def draw(self):
+        """Функция, отрисовки обьектов"""
         for position in self.positions[:-1]:
             rect = (pygame.Rect(position, (GRID_SIZE, GRID_SIZE)))
             pygame.draw.rect(screen, self.body_color, rect)
@@ -117,8 +119,8 @@ class Snake(GameObject):
 
     def move(self):
         """Функция, с помощью которой двигается змейка.
-        (создается голова и удаляется хвост)."""
-
+        (создается голова и удаляется хвост).
+        """
         head_x, head_y = self.get_head_position()
         dx, dy = self.direction
 
@@ -142,8 +144,8 @@ class Snake(GameObject):
         self.last = None
 
 
-# Функция обработки действий пользователя
 def handle_keys(game_object):
+    """Функция обработки действий пользователя"""
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -160,6 +162,7 @@ def handle_keys(game_object):
 
 
 def main():
+    """Основная функция, с помощью которой игра работает"""
     # Инициализация PyGame:
     pygame.init()
     # Тут нужно создать экземпляры классов.
