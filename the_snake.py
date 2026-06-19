@@ -27,6 +27,12 @@ APPLE_COLOR = (255, 0, 0)
 # Цвет змейки
 SNAKE_COLOR = (0, 255, 0)
 
+# Цвет плохой еды
+BAD_APPLE_COLOR = (150, 75, 0)
+
+# Цвет камня
+ROCK_COLOR = (128, 128, 128)
+
 # Скорость движения змейки:
 SPEED = 20
 
@@ -62,6 +68,56 @@ class Apple(GameObject):
 
     def randomize_position(self):
         """Функция, которая получает случайные координаты для яблока."""
+        # Число ячеек на поле.
+        max_grid_height = SCREEN_HEIGHT // GRID_SIZE
+        max_grid_width = SCREEN_WIDTH // GRID_SIZE
+
+        random_y = randint(0, max_grid_height - 1) * GRID_SIZE
+        random_x = randint(0, max_grid_width - 1) * GRID_SIZE
+        self.position = (random_x, random_y)
+
+    # Метод draw класса Apple
+    def draw(self):
+        """Функция, отрисовки обьектов"""
+        rect = pygame.Rect(self.position, (GRID_SIZE, GRID_SIZE))
+        pygame.draw.rect(screen, self.body_color, rect)
+        pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
+
+
+class BadApple(GameObject):
+    """Класс, с помощью которого создаем плохое яблоко."""
+
+    def __init__(self, body_color=BAD_APPLE_COLOR):
+        super().__init__(body_color)
+        self.randomize_position()
+
+    def randomize_position(self):
+        """Функция, которая получает случайны координаты для плохого яблока."""
+        # Число ячеек на поле.
+        max_grid_height = SCREEN_HEIGHT // GRID_SIZE
+        max_grid_width = SCREEN_WIDTH // GRID_SIZE
+
+        random_y = randint(0, max_grid_height - 1) * GRID_SIZE
+        random_x = randint(0, max_grid_width - 1) * GRID_SIZE
+        self.position = (random_x, random_y)
+
+    # Метод draw класса BadApple
+    def draw(self):
+        """Функция, отрисовки обьектов"""
+        rect = pygame.Rect(self.position, (GRID_SIZE, GRID_SIZE))
+        pygame.draw.rect(screen, self.body_color, rect)
+        pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
+
+
+class Rock(GameObject):
+    """Класс, с помощью которого создаем камень."""
+
+    def __init__(self, body_color=ROCK_COLOR):
+        super().__init__(body_color)
+        self.randomize_position()
+
+    def randomize_position(self):
+        """Функция, которая получает случайные координаты для камня."""
         # Число ячеек на поле.
         max_grid_height = SCREEN_HEIGHT // GRID_SIZE
         max_grid_width = SCREEN_WIDTH // GRID_SIZE
@@ -143,6 +199,14 @@ class Snake(GameObject):
         self.next_direction = None
         self.last = None
 
+    def eat_bad_apple(self):
+        """Функция, которая при сьедании плохого яблока уменьшает змейку"""
+        if self.length > 1:
+            self.length -= 1
+            last_segment = self.positions.pop()
+            last_rect = pygame.Rect(last_segment, (GRID_SIZE, GRID_SIZE))
+            pygame.draw.rect(screen, BOARD_BACKGROUND_COLOR, last_rect)
+
 
 def handle_keys(game_object):
     """Функция обработки действий пользователя"""
@@ -168,6 +232,8 @@ def main():
     # Тут нужно создать экземпляры классов.
     apple = Apple()
     snake = Snake()
+    bad_apple = BadApple()
+    rock = Rock()
 
     while True:
         clock.tick(SPEED)
@@ -181,12 +247,24 @@ def main():
             snake.length += 1
             apple.randomize_position()
 
+        if snake.get_head_position() == bad_apple.position:
+            snake.eat_bad_apple()
+            bad_apple.randomize_position()
+
+        if snake.get_head_position() == rock.position:
+            snake.reset()
+            rock.randomize_position()
+            rock.draw()
+            screen.fill(BOARD_BACKGROUND_COLOR)
+
         if snake.get_head_position() in snake.positions[1:]:
             snake.reset()
             screen.fill(BOARD_BACKGROUND_COLOR)
 
         apple.draw()
         snake.draw()
+        bad_apple.draw()
+        rock.draw()
         pygame.display.update()
 
 
