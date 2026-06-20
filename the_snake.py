@@ -56,25 +56,31 @@ class GameObject:
 
     def draw(self):
         """Функция, отрисовки обьектов"""
-        pass
 
 
 class Apple(GameObject):
     """Класс, с помощью которого создаем яблоко."""
 
-    def __init__(self, body_color=APPLE_COLOR):
+    def __init__(self, occupied=None, body_color=APPLE_COLOR):
         super().__init__(body_color)
-        self.randomize_position()
+        self.randomize_position(occupied)
 
-    def randomize_position(self):
+    def randomize_position(self, occupied=None):
         """Функция, которая получает случайные координаты для яблока."""
         # Число ячеек на поле.
+        if occupied == None:
+            occupied = []
+
         max_grid_height = SCREEN_HEIGHT // GRID_SIZE
         max_grid_width = SCREEN_WIDTH // GRID_SIZE
 
-        random_y = randint(0, max_grid_height - 1) * GRID_SIZE
-        random_x = randint(0, max_grid_width - 1) * GRID_SIZE
-        self.position = (random_x, random_y)
+        while True:    
+            random_y = randint(0, max_grid_height - 1) * GRID_SIZE
+            random_x = randint(0, max_grid_width - 1) * GRID_SIZE
+            new_position = (random_x, random_y)
+            if new_position not in occupied:
+                self.position = new_position
+                break
 
     # Метод draw класса Apple
     def draw(self):
@@ -87,21 +93,28 @@ class Apple(GameObject):
 class BadApple(GameObject):
     """Класс, с помощью которого создаем плохое яблоко."""
 
-    def __init__(self, body_color=BAD_APPLE_COLOR):
+    def __init__(self, occupied=None, body_color=BAD_APPLE_COLOR):
         super().__init__(body_color)
-        self.randomize_position()
+        self.randomize_position(occupied)
 
-    def randomize_position(self):
-        """Функция, которая получает случайны координаты для плохого яблока."""
+    def randomize_position(self, occupied=None):
+        """Функция, которая получает случайные координаты для яблока."""
         # Число ячеек на поле.
+        if occupied == None:
+            occupied = []
+
         max_grid_height = SCREEN_HEIGHT // GRID_SIZE
         max_grid_width = SCREEN_WIDTH // GRID_SIZE
 
-        random_y = randint(0, max_grid_height - 1) * GRID_SIZE
-        random_x = randint(0, max_grid_width - 1) * GRID_SIZE
-        self.position = (random_x, random_y)
+        while True:
+            random_y = randint(0, max_grid_height - 1) * GRID_SIZE
+            random_x = randint(0, max_grid_width - 1) * GRID_SIZE
+            new_position = (random_x, random_y)
+            if new_position not in occupied:
+                self.position = new_position
+                break
 
-    # Метод draw класса BadApple
+    # Метод draw класса Apple
     def draw(self):
         """Функция, отрисовки обьектов"""
         rect = pygame.Rect(self.position, (GRID_SIZE, GRID_SIZE))
@@ -112,19 +125,26 @@ class BadApple(GameObject):
 class Rock(GameObject):
     """Класс, с помощью которого создаем камень."""
 
-    def __init__(self, body_color=ROCK_COLOR):
+    def __init__(self, occupied=None, body_color=ROCK_COLOR):
         super().__init__(body_color)
-        self.randomize_position()
+        self.randomize_position(occupied)
 
-    def randomize_position(self):
-        """Функция, которая получает случайные координаты для камня."""
+    def randomize_position(self, occupied=None):
+        """Функция, которая получает случайные координаты для яблока."""
         # Число ячеек на поле.
+        if occupied == None:
+            occupied = []
+
         max_grid_height = SCREEN_HEIGHT // GRID_SIZE
         max_grid_width = SCREEN_WIDTH // GRID_SIZE
 
-        random_y = randint(0, max_grid_height - 1) * GRID_SIZE
-        random_x = randint(0, max_grid_width - 1) * GRID_SIZE
-        self.position = (random_x, random_y)
+        while True:    
+            random_y = randint(0, max_grid_height - 1) * GRID_SIZE
+            random_x = randint(0, max_grid_width - 1) * GRID_SIZE
+            new_position = (random_x, random_y)
+            if new_position not in occupied:
+                self.position = new_position
+                break
 
     # Метод draw класса Apple
     def draw(self):
@@ -164,7 +184,8 @@ class Snake(GameObject):
             pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
 
     #     # Отрисовка головы змейки
-        head_rect = pygame.Rect(self.positions[0], (GRID_SIZE, GRID_SIZE))
+        head_rect = pygame.Rect(
+            self.get_head_position(), (GRID_SIZE, GRID_SIZE))
         pygame.draw.rect(screen, self.body_color, head_rect)
         pygame.draw.rect(screen, BORDER_COLOR, head_rect, 1)
 
@@ -199,14 +220,6 @@ class Snake(GameObject):
         self.next_direction = None
         self.last = None
 
-    def eat_bad_apple(self):
-        """Функция, которая при сьедании плохого яблока уменьшает змейку"""
-        if self.length > 1:
-            self.length -= 1
-            last_segment = self.positions.pop()
-            last_rect = pygame.Rect(last_segment, (GRID_SIZE, GRID_SIZE))
-            pygame.draw.rect(screen, BOARD_BACKGROUND_COLOR, last_rect)
-
 
 def handle_keys(game_object):
     """Функция обработки действий пользователя"""
@@ -214,7 +227,7 @@ def handle_keys(game_object):
         if event.type == pygame.QUIT:
             pygame.quit()
             raise SystemExit
-        elif event.type == pygame.KEYDOWN:
+        if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_UP and game_object.direction != DOWN:
                 game_object.next_direction = UP
             elif event.key == pygame.K_DOWN and game_object.direction != UP:
@@ -230,10 +243,11 @@ def main():
     # Инициализация PyGame:
     pygame.init()
     # Тут нужно создать экземпляры классов.
-    apple = Apple()
     snake = Snake()
-    bad_apple = BadApple()
-    rock = Rock()
+    apple = Apple(occupied=snake.positions)
+    bad_apple = BadApple(occupied=snake.positions + [apple.position])
+    rock = Rock(occupied=snake.positions +
+                [apple.position, bad_apple.position])
 
     while True:
         clock.tick(SPEED)
@@ -243,21 +257,31 @@ def main():
         snake.update_direction()
         snake.move()
 
+        occupied = (snake.positions + [bad_apple.position, rock.position])
+
         if snake.get_head_position() == apple.position:
             snake.length += 1
-            apple.randomize_position()
+            apple.randomize_position(occupied)
 
-        if snake.get_head_position() == bad_apple.position:
-            snake.eat_bad_apple()
-            bad_apple.randomize_position()
+        elif snake.get_head_position() == bad_apple.position:
+            if snake.length > 1: 
+                snake.length -= 1 
+                last_segment = snake.positions.pop() 
+                last_rect = pygame.Rect(last_segment, (GRID_SIZE, GRID_SIZE)) 
+                pygame.draw.rect(screen, BOARD_BACKGROUND_COLOR, last_rect)
+                bad_apple.randomize_position(
+                    snake.positions + [apple.position, rock.position]
+                )
 
-        if snake.get_head_position() == rock.position:
+        elif snake.get_head_position() == rock.position:
             snake.reset()
-            rock.randomize_position()
+            rock.randomize_position(
+                snake.positions + [apple.position, bad_apple.position]
+            )
             rock.draw()
             screen.fill(BOARD_BACKGROUND_COLOR)
 
-        if snake.get_head_position() in snake.positions[1:]:
+        elif snake.get_head_position() in snake.positions[1:]:
             snake.reset()
             screen.fill(BOARD_BACKGROUND_COLOR)
 
