@@ -68,13 +68,13 @@ class Apple(GameObject):
     def randomize_position(self, occupied=None):
         """Функция, которая получает случайные координаты для яблока."""
         # Число ячеек на поле.
-        if occupied == None:
+        if occupied is None:
             occupied = []
 
         max_grid_height = SCREEN_HEIGHT // GRID_SIZE
         max_grid_width = SCREEN_WIDTH // GRID_SIZE
 
-        while True:    
+        while True:
             random_y = randint(0, max_grid_height - 1) * GRID_SIZE
             random_x = randint(0, max_grid_width - 1) * GRID_SIZE
             new_position = (random_x, random_y)
@@ -100,7 +100,7 @@ class BadApple(GameObject):
     def randomize_position(self, occupied=None):
         """Функция, которая получает случайные координаты для яблока."""
         # Число ячеек на поле.
-        if occupied == None:
+        if occupied is None:
             occupied = []
 
         max_grid_height = SCREEN_HEIGHT // GRID_SIZE
@@ -132,13 +132,13 @@ class Rock(GameObject):
     def randomize_position(self, occupied=None):
         """Функция, которая получает случайные координаты для яблока."""
         # Число ячеек на поле.
-        if occupied == None:
+        if occupied is None:
             occupied = []
 
         max_grid_height = SCREEN_HEIGHT // GRID_SIZE
         max_grid_width = SCREEN_WIDTH // GRID_SIZE
 
-        while True:    
+        while True:
             random_y = randint(0, max_grid_height - 1) * GRID_SIZE
             random_x = randint(0, max_grid_width - 1) * GRID_SIZE
             new_position = (random_x, random_y)
@@ -246,8 +246,9 @@ def main():
     snake = Snake()
     apple = Apple(occupied=snake.positions)
     bad_apple = BadApple(occupied=snake.positions + [apple.position])
-    rock = Rock(occupied=snake.positions +
-                [apple.position, bad_apple.position])
+    rock = Rock(occupied=snake.positions
+                + [apple.position, bad_apple.position]
+                )
 
     while True:
         clock.tick(SPEED)
@@ -264,10 +265,10 @@ def main():
             apple.randomize_position(occupied)
 
         elif snake.get_head_position() == bad_apple.position:
-            if snake.length > 1: 
-                snake.length -= 1 
-                last_segment = snake.positions.pop() 
-                last_rect = pygame.Rect(last_segment, (GRID_SIZE, GRID_SIZE)) 
+            if snake.length > 1:
+                snake.length -= 1
+                last_segment = snake.positions.pop()
+                last_rect = pygame.Rect(last_segment, (GRID_SIZE, GRID_SIZE))
                 pygame.draw.rect(screen, BOARD_BACKGROUND_COLOR, last_rect)
                 bad_apple.randomize_position(
                     snake.positions + [apple.position, rock.position]
